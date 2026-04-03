@@ -28,7 +28,7 @@ if __name__ == "__main__":
             #set current position and implement changes to x,y,phi for new position
             x,y,ori = current_position
             
-            new_ori = ori + angle_change * 30
+            new_ori = (ori + angle_change * 30)%360
             
             new_x = x + step_length*cos(new_ori)
             new_y = y + step_length*sin(new_ori)

@@ -54,7 +54,7 @@ def prompt_user_node(all_nodes:dict, node_name:str, board_length:int,board_heigh
     data_verification = False
     while not data_verification:
         print(f"Please define a {node_name} point (x,y,phi)")
-        user_input = input("please enter integers 0-600 for x, and 0-250 for y, and 0-360 for phi (orientation) seperated by a comma: ")
+        user_input = input("please enter integers 0-600 for x, and 0-250 for y, and an intiger for orientation (multiplied by 30deg, -1 = 330, 5 = 150) seperated by a comma: ")
         
         if "," not in user_input:
             print("I only see one value, please enter three coordinates")
@@ -78,19 +78,17 @@ def prompt_user_node(all_nodes:dict, node_name:str, board_length:int,board_heigh
             print(f"that location is out of bounds, please enter a locations betwen 0<= x <= {board_length}, 0<= y <= {board_height}")
             continue
         
-        elif phi > 360 or phi < 0:
-            print("Phi is required to be between 0 and 360! Please enter a valid value")
-        
         else:        
             if all_nodes[(x,y)]["color"]!='w':
                 print(f"That coordinate node is within an obstacle and is not a valid {node_name} point! Please enter another node.")                        
                 continue
             else:
-                print(f"Thank you, {node_name} nodes is {x,y,phi}")
+                ori = 30*(phi%12)
+                print(f"Thank you, {node_name} nodes is {x,y,ori}")
                 data_verification = True
                 break           
 
-    origin = (x,y,phi)
+    origin = (x,y,ori)
 
     return origin
     

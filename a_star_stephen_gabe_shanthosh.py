@@ -12,6 +12,10 @@ if __name__ == "__main__":
     node_queue = PriorityQueue()
     cost_dict = {}
     parent_dict = {}
+    visualization_support=[]
+    visualizataion_iterator = 0
+    visualization_orientations = (0,0,0,0,0)
+    
     
     given_width = 600
     given_height = 250
@@ -65,7 +69,9 @@ if __name__ == "__main__":
         #iterate for each new position
         for new_pos in new_pos_list:
             
-            new_cost = cost_traveled+find_dist_to_goal(new_pos,start_point) 
+            new_cost = cost_traveled+find_dist_to_goal(new_pos,start_point)
+            
+            visualization_orientation_list = []
                            
             #bucketize position for simple comparison
             bucket_pos = bucketize(new_pos)            
@@ -73,7 +79,9 @@ if __name__ == "__main__":
             #check if new position is in a obstacle/interference space
             if is_obstructed_space(new_pos):
                 continue
-                
+            else:
+                visualization_orientation_list.append(new_pos[2])
+                 
             #has node been visited before
             if bucket_pos in cost_dict:                  
                 
@@ -104,6 +112,9 @@ if __name__ == "__main__":
             break
         
         current_node = node_queue.get()
+        visualization_orientations = tuple(visualization_orientation_list)
+        visualization_support.append((visualizataion_iterator,current_position,visualization_orientations))
+        visualizataion_iterator += 1
         
     if solution_found:
         #backtracking
@@ -114,7 +125,5 @@ if __name__ == "__main__":
             
             back_path.append(current_node)
             current_node = parent_dict[current_node]
-        
-        print(list(back_path))
 
         

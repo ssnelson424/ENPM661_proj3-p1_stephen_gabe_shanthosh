@@ -40,19 +40,14 @@ board (black,red,white), the locations explored (green), and the path from start
             -The first two intigers are the x,y coordinates, and the third is the orientation which will be multipled by 30 degrees
             -If the user enters an invalid point or a point that is within an obstacle/interference space, the user will be prompted for another input
         
-        3. The script will run and display a plot of the searched areas (green) and optimal path in purple
+        3. The script will run and display an animated plot of the searched areas in green arrows
 
-        4. After user exits the plot, the user will be prompted if they want a animated version of the plot. The animated version
-           is a mp4 showing the expanding explored nodes and then the creation of the optimal path from start to goal. User
-           should enter Y or N based on their preference.
-        
-        5. After a few moments, an animated plot will be saved in the chosen directory under "dijkstra_stephen_snelson.gif". (No pop-up, outside of
-           terminal link)
+        4. Once the green arrow plot is complete, another plot of magenta arrows will be created to show the final path
 
-        6. Script is complete and close
+        5. Script is complete, close additional tabs to reset and plug in a different position
         
 
 ## Outputs:
     -Terminal Output: User will be prompted for inputs and additional information will be provided for operational clarity
-    -Still-plot of all explored nodes and path from start to goal
-    -Animated mp4 saved as "dijkstra_stephen_snelson.gif"
+    -Animation showing the exploration of the plot through green arrows titled "exploration"
+    -Second animation of the final path being traced in magenta titled "final path"

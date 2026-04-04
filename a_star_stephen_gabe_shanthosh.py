@@ -45,7 +45,7 @@ if __name__ == "__main__":
     #perform search
     while True:
         current_cost = current_node[0]
-        current_position = current_node[1]
+        current_position = current_node[1] 
 
         #cost traveled (excluding estimate)
         cost_traveled = current_cost - find_dist_to_goal(current_position,start_point) + step_length
@@ -105,16 +105,24 @@ if __name__ == "__main__":
                 node_queue.put((new_cost,new_pos))
                 cost_dict[bucket_pos] = new_cost
                 parent_dict[new_pos] = current_position
-                
-        if node_queue.empty():
-            solution_found = False
-            print("no solution")
-            break
-        
-        current_node = node_queue.get()
+                      
+
         visualization_orientations = tuple(visualization_orientation_list)
         visualization_support.append((visualizataion_iterator,current_position,visualization_orientations))
         visualizataion_iterator += 1
+        
+        while not node_queue.empty():        
+            test_node = node_queue.get()
+            test_cost, test_pos = test_node
+
+            # accept only if this is still the best known path
+            if cost_dict.get(bucketize(test_pos), float('inf')) == test_cost:
+                current_node = test_node
+                break
+        else:
+            solution_found = False
+            print("no solution")
+            break
         
     if solution_found:
         #backtracking

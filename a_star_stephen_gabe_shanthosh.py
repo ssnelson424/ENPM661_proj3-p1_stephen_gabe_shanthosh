@@ -1,46 +1,17 @@
 from collections import deque
-from map_creation_stephen_gabe_shanthosh import create_board, prompt_user_node
+from map_creation_stephen_gabe_shanthosh import create_board, prompt_user_node, prompt_user_step, is_obstructed_space
 from math import cos
 from math import sin
+from queue import PriorityQueue
 import matplotlib.pyplot as plt
+from actions_stephen_gabe_shanthosh import move_factory, is_finished, find_dist_to_goal, bucketize
 
 
 if __name__ == "__main__":
-    
-    #step 1: Define Actions in a Mathematical Format
-    
-    def move_factory(step_length:float,angle_change:int):
-        """creates a move function with input changes
-
-        Args:
-            step_length(float): step length defined by the user
-            angle_change (int): angle change * 30degs (0 is straight, 1 is 30 deg, -1 is -30, etc)
-        """
-    
-        def move_function(current_position:tuple):
-            """function returned by move_factory
-
-            Args:
-                current_position (tuple): position provided by the program of the location being evaluated
-                
-            """
-            
-            #set current position and implement changes to x,y,phi for new position
-            x,y,ori = current_position
-            
-            new_ori = (ori + angle_change * 30)%360
-            
-            new_x = x + step_length*cos(new_ori)
-            new_y = y + step_length*sin(new_ori)
-            
-            return (new_x, new_y, new_ori)
-    
-        #return the function
-        return move_function  
-    
-    #step 2: Find the mathematical Format for free space
-        #equations must account for the 5 mm clearance of the robot
-        #height 250 width 600
+    #define data_structures
+    node_queue = PriorityQueue()
+    cost_dict = {}
+    parent_dict = {}
     
     given_width = 600
     given_height = 250
@@ -49,24 +20,17 @@ if __name__ == "__main__":
     
     start_point = prompt_user_node(game_board,"starting",given_width,given_height)
     goal_point = prompt_user_node(game_board,"goal",given_width,given_height)
+    step_length = prompt_user_step()
     
-    #User Input Step Length
-    length_validation = False
-    while not length_validation:
-        step_length_str = input("Please enter an step length (float) between 1 and 10 (inclusive): ")
-        if not all(c in "0123456789." for c in step_length_str):
-            print("Please only enter numeric values for step length and only intiger values!")
-            continue
-        
-        if step_length_str.count(".") > 1:
-            print("There are too many decimal points, please enter a valid float value!")
-            continue
-        
-        step_length = float(step_length_str)
-        
-        if 1 <= step_length <= 10:
-            length_validation = True        
+    parent_dict[goal_point] = "Initial"
+    cost_dict[bucketize(goal_point)] = find_dist_to_goal(goal_point,start_point)
+    current_cost = 0+find_dist_to_goal(goal_point,start_point)
+    initial_node = (current_cost,goal_point)
+    
+    node_queue.put(initial_node)
+    current_node = node_queue.get()
 
+    
     #Create move actions from the move factory function
     move_straight = move_factory(step_length, 0)
     move_right_30 = move_factory(step_length, 1)
@@ -74,59 +38,83 @@ if __name__ == "__main__":
     move_left_30 = move_factory(step_length, -1)
     move_left_60 = move_factory(step_length, -2)
     
-    #_____________BELOW THIS IS ALL VISUALIZATION STUFF TO BO DELETED___________________
-    #green
-    starting_x = [start_point[0]]
-    starting_y = [start_point[1]]
-    #blue
-    goal_x = [goal_point[0]]
-    goal_y = [goal_point[1]]
-    #black
-    obstacle_x =[]
-    obstacle_y = []
-    #white
-    empty_x = []
-    empty_y = []
-    #red
-    interference_x = []
-    interference_y = []
-    #cyan
-    visited_x = []
-    visited_y = []
-    #yellow
-    path_x = []
-    path_y = []
-    
-    #fill x and y data structures with nodes of colors to be plotted
-    for (x,y),value in game_board.items():
-        if value["color"] == 'b':
-            obstacle_x.append(x)
-            obstacle_y.append(y)
-        elif value["color"] == 'w':
-            empty_x.append(x)
-            empty_y.append(y)
-        elif value["color"] == 'r':
-            interference_x.append(x)
-            interference_y.append(y)
-        elif value["color"] == 'c':
-            visited_x.append(x)
-            visited_y.append(y)
-    
-    #plot each set of x/y lists
-    plt.scatter(empty_x, empty_y, c="white", label = "Empty Space")
-    plt.scatter(interference_x,interference_y, c="red", label = "Robot Radius of Interference")
-    plt.scatter(obstacle_x,obstacle_y, c ="black", edgecolors="black", label = "Obstacles")
-    plt.scatter(visited_x,visited_y, c="cyan", label = "Explored Nodes")
-    plt.scatter(path_x,path_y, c="yellow",label ="Optimal Path")
-    plt.scatter(starting_x,starting_y, c="blue", label ="Starting Point")
-    plt.scatter(goal_x,goal_y, c="green", label ="Goal Point")
-    
-    #plot labels
-    plt.title("A* Search and Optimal Path Plot - Stephen Gabe Shanthosh")
-    plt.xlabel("X")
-    plt.ylabel("Y")
-    plt.legend(loc='upper left')
-    
-    #show plot
-    print("Program will continue upon closure of the plot window.")
-    plt.show()    
+    #perform search
+    while True:
+        current_cost = current_node[0]
+        current_position = current_node[1]
+
+        #cost traveled (excluding estimate)
+        cost_traveled = current_cost - find_dist_to_goal(current_position,start_point) + step_length
+        
+        #is this node near the goal node
+        if is_finished(current_position,start_point,1.5):
+            solution_found = True
+            final_node = current_position
+            print(f"search complete")
+            break
+        
+        #perform moves to find new positions
+        new_pos_list = []
+        
+        new_pos_list.append(move_straight(current_position))
+        new_pos_list.append(move_left_30(current_position))
+        new_pos_list.append(move_left_60(current_position))
+        new_pos_list.append(move_right_30(current_position))
+        new_pos_list.append(move_right_60(current_position))
+
+        #iterate for each new position
+        for new_pos in new_pos_list:
+            
+            new_cost = cost_traveled+find_dist_to_goal(new_pos,start_point) 
+                           
+            #bucketize position for simple comparison
+            bucket_pos = bucketize(new_pos)            
+        
+            #check if new position is in a obstacle/interference space
+            if is_obstructed_space(new_pos):
+                continue
+                
+            #has node been visited before
+            if bucket_pos in cost_dict:                  
+                
+                #is new pos a higher/equal cost
+                if cost_dict[bucket_pos] <= new_cost:
+                    continue
+                
+                #new pos is a lower cost
+                else:                   
+                    
+                    #update cost dictionary
+                    cost_dict[bucket_pos] = new_cost
+                    
+                    #update parent dictionary
+                    parent_dict[new_pos] = current_position
+                    
+                    node_queue.put((new_cost,new_pos))
+            
+            #node has not be visited before
+            else:
+                node_queue.put((new_cost,new_pos))
+                cost_dict[bucket_pos] = new_cost
+                parent_dict[new_pos] = current_position
+                
+        if node_queue.empty():
+            solution_found = False
+            print("no solution")
+            break
+        
+        current_node = node_queue.get()
+        
+    if solution_found:
+        #backtracking
+        back_path = deque()
+        current_node = final_node
+        
+        while current_node != goal_point:
+            
+            back_path.append(current_node)
+            current_node = parent_dict[current_node]
+        
+        print(list(back_path))
+
+        

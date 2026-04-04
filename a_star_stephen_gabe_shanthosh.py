@@ -1,3 +1,8 @@
+#Stephen Snelson, Gabe Szybalski, Shanthosh Raaj
+#ENPM661 Planning
+#Project 3 - Phase 1 - Backwards A*
+#Main file/alogithm
+
 from collections import deque
 from map_creation_stephen_gabe_shanthosh import create_board, prompt_user_node, prompt_user_step, is_obstructed_space
 from math import cos

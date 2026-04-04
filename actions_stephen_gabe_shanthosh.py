@@ -1,3 +1,8 @@
+#Stephen Snelson, Gabe Szybalski, Shanthosh Raaj
+#ENPM661 Planning
+#Project 3 - Phase 1 - Backwards A*
+#actions file
+
 from math import cos
 from math import sin
 from math import floor

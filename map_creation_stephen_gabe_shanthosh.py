@@ -1,7 +1,7 @@
-# Stephen Snelson
-# ENPM661-RO01 Planning for Autonomous Robots
-# Project 2
-# Map Creation
+#Stephen Snelson, Gabe Szybalski, Shanthosh Raaj
+#ENPM661 Planning
+#Project 3 - Phase 1 - Backwards A*
+#Map Creation/Iteraction
 
 def mark_obstacle(x:int,y:int) -> dict:
     """marks a node as part of an obstacle by changing the color to black
